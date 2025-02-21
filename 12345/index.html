@@ -1,189 +1,151 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>動画情報取得</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    #results {
-      display: none;
-      margin-top: 20px;
-    }
-    #video-player {
-      max-width: 100%;
-      margin-top: 10px;
-      display: none;
-    }
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.6);
-      z-index: 9999;
-    }
-    #loading-popup {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      color: black;
-      padding: 20px;
-      border-radius: 8px;
-      font-size: 16px;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube?</title>
+    <style>
+
+body {
+  font-family: "Arial", sans-serif;
+}
+
+        #size-controls {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <h2>動画情報取得ツール</h2>
-  <form id="video-form">
-    <label for="video-id">動画IDまたはURL:</label>
-    <input type="text" id="video-id" required>
-    <button type="submit">取得</button>
-  </form>
+    <h2>YouTube動画取得</h2>
 
-  <div id="overlay">
-    <div id="loading-popup">取得中...</div>
-  </div>
+    <!-- 動画IDまたはリンクを入力するフォーム -->
+    <form id="video-form">
+        <label for="video-input">動画IDまたはリンクを入力:</label>
+        <input type="text" id="video-input" name="video" placeholder="動画ID または URL">
+        <button type="submit">Go</button>
+    </form>
 
-  <div id="results">
-    <h2>動画情報</h2>
-    <p><strong>タイトル:</strong> <span id="title"></span></p>
-    <p><strong>URL:</strong> <a id="stream-url" href="#" target="_blank">ダウンロードリンク</a></p>
-    <video id="video-player" controls>
-      <source id="video-source" type="video/mp4">
-      お使いのブラウザは動画の再生をサポートしていません。
-    </video>
-    <p><strong>再生回数:</strong> <span id="views"></span></p>
-    <p><strong>高評価数:</strong> <span id="likes"></span></p>
-    <p><strong>公開日時:</strong> <span id="published"></span></p>
-    <p><strong>概要:</strong></p>
-    <pre id="description"></pre>
-    <h3>コメント</h3>
-    <ul id="comments"></ul>
-  </div>
+    <!-- 動画サイズ変更のコントロール -->
+    <div id="size-controls">
+        <label for="size-slider">動画サイズ調整 (幅): </label>
+        <input type="range" id="size-slider" min="1" max="2" step="0.1" value="1">
+        <span id="size-label">1倍</span>
+    </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const videoId = urlParams.get("videoId");
+    <!-- 動画を埋め込むコンテナ -->
+    <div id="youtube-embed-container"></div>
 
-      if (videoId) {
-        fetchVideoData(videoId);
-      }
-    });
+    <script>
+        // 動画IDまたはリンクを埋め込む関数
+        function embedYouTubeVideo(videoID, sizeMultiplier = 1) {
+            const baseURL = "https://www.youtubeeducation.com/embed/";
+            const params = "?autoplay=0&amp;mute=0&amp;controls=1&amp;start=0&amp;origin=https%3A%2F%2Fcreate.kahoot.it&amp;playsinline=1&amp;showinfo=0&amp;rel=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;fs=1&amp;embed_config=%7B%22enc%22%3A%22ATi76SOph3SBFuU_QUN3IfxfQ3Z3fhVrv1W-w1eN1sRJmB7ZR57oDvxmaXQnxt6h9kQSLo1IZWHKMPKDpN57S1fMI_iM9NuayS9_COjGWKQrPVbECJ71n818_Vvi9U7aKuQAICG0dB4NEI9Bpvw-LfLoUjb7qcUYUw%3D%3D%22%2C%22hideTitle%22%3Atrue%7D&amp;enablejsapi=1&amp;widgetid=1";
 
-    const form = document.getElementById("video-form");
-    const overlay = document.getElementById("overlay");
-    const results = document.getElementById("results");
+            const embedURL = baseURL + videoID + params;
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const videoIdInput = document.getElementById("video-id");
-      const input = videoIdInput.value.trim();
-      
-      const videoId = extractVideoId(input);
-      if (videoId) {
-        updateUrlWithVideoId(videoId);
-        await fetchVideoData(videoId);
-      } else {
-        alert("正しい動画IDまたはURLを入力してください。");
-      }
-    });
+            // 既存のiframeを削除
+            const container = document.getElementById('youtube-embed-container');
+            container.innerHTML = '';
 
-    async function fetchVideoData(videoId) {
-      const apiUrl = `https://script.google.com/macros/s/AKfycbxYjOWULjin5kpp-NcjjjGujVX3wy1TEJVUR2AZtR6-5c_q7GBr1Nctl2_Kat4lSboD/exec?videoId=api/v1/videos/${videoId}`;
-      overlay.style.display = "block";
+            // 新しいiframeを作成
+            const iframe = document.createElement('iframe');
+            iframe.src = embedURL;
+            iframe.width = 560 * sizeMultiplier; // 幅を調整
+            iframe.height = 315 * sizeMultiplier; // 高さを調整
+            iframe.frameBorder = '0';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+            iframe.allowFullscreen = true;
 
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-          throw new Error("APIリクエストに失敗しました");
+            container.appendChild(iframe);
         }
-        const data = await response.json();
-        displayResults(data);
-      } catch (error) {
-        alert(`エラー: ${error.message}`);
-      } finally {
-        overlay.style.display = "none";
-      }
-    }
 
-    function extractVideoId(input) {
-      const videoIdPattern = /^[a-zA-Z0-9_-]{11}$/;
-      const urlPattern = /(?:https?:\/\/)?(?:www\.)?youtube\.com\/.*[?&]v=([a-zA-Z0-9_-]{11})|youtu\.be\/([a-zA-Z0-9_-]{11})/;
+        // 入力フォームの送信処理
+        document.getElementById('video-form').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-      if (videoIdPattern.test(input)) {
-        return input;
-      }
+            const videoInput = document.getElementById('video-input').value.trim();
 
-      const urlMatch = input.match(urlPattern);
-      if (urlMatch) {
-        return urlMatch[1] || urlMatch[2];
-      }
+            let videoID = '';
 
-      return null;
-    }
+            // URLの場合
+            const urlRegex = /(?:youtube\.com\/(?:[^\/]+\/[^\/]+\/|(?:v|e(?:mbed)?)\/|(?:.*[?&]v=))([^"&?\/\s]{11}))/;
+            const match = videoInput.match(urlRegex);
+            if (match) {
+                videoID = match[1];  // 動画IDを取得
+            } else {
+                // そのまま動画IDが入力された場合
+                videoID = videoInput;
+            }
 
-    function updateUrlWithVideoId(videoId) {
-      const currentUrl = new URL(window.location.href);
-      currentUrl.searchParams.set("videoId", videoId);
-      window.history.pushState(null, "", currentUrl);
-    }
-
-    function displayResults(data) {
-      document.getElementById("title").textContent = data.title;
-
-      const formatStreams = data.formatStreams || [];
-      const streamUrl = formatStreams.length > 0 ? formatStreams[0].url : null;
-
-      const streamLink = document.getElementById("stream-url");
-      const videoPlayer = document.getElementById("video-player");
-      const videoSource = document.getElementById("video-source");
-
-      if (streamUrl) {
-        streamLink.href = streamUrl;
-        streamLink.textContent = "ダウンロードURL";
-
-        videoSource.src = streamUrl;
-        videoPlayer.style.display = "block";
-        videoPlayer.load();
-      } else {
-        streamLink.textContent = "映像付きストリームが見つかりません";
-        streamLink.href = "#";
-        videoPlayer.style.display = "none";
-      }
-
-      document.getElementById("views").textContent = data.viewCount || "不明";
-      document.getElementById("likes").textContent = data.likeCount || "不明";
-      document.getElementById("published").textContent = data.publishedText || "不明";
-      
-      // 概要欄の改行を適用
-      document.getElementById("description").textContent = data.description || "なし";
-
-      const commentsContainer = document.getElementById("comments");
-      commentsContainer.innerHTML = "";
-      if (data.comments && data.comments.length > 0) {
-        data.comments.forEach((comment) => {
-          const li = document.createElement("li");
-          li.textContent = `${comment.author}: ${comment.text}`;
-          commentsContainer.appendChild(li);
+            if (videoID) {
+                embedYouTubeVideo(videoID);
+            } else {
+                alert("YouTubeの動画IDまたはリンクを正しく入力してください。");
+            }
         });
-      } else {
-        const li = document.createElement("li");
-        li.textContent = "未実装";
-        commentsContainer.appendChild(li);
-      }
 
-      results.style.display = "block";
-    }
-  </script>
+        // サイズ調整スライダーの変更処理
+        document.getElementById('size-slider').addEventListener('input', function() {
+            const sizeMultiplier = parseFloat(this.value);
+            const sizeLabel = document.getElementById('size-label');
+            sizeLabel.textContent = `${sizeMultiplier}倍`;
+            
+            // 現在の動画IDを取得して再埋め込み
+            const videoInput = document.getElementById('video-input').value.trim();
+            let videoID = '';
+
+            const urlRegex = /(?:youtube\.com\/(?:[^\/]+\/[^\/]+\/|(?:v|e(?:mbed)?)\/|(?:.*[?&]v=))([^"&?\/\s]{11}))/;
+            const match = videoInput.match(urlRegex);
+            if (match) {
+                videoID = match[1];
+            } else {
+                videoID = videoInput;
+            }
+
+            if (videoID) {
+                embedYouTubeVideo(videoID, sizeMultiplier);
+            }
+        });
+
+        // キーボード入力でサイズ調整（1〜2、0.1刻み）
+        document.addEventListener('keydown', function(event) {
+            const slider = document.getElementById('size-slider');
+            let currentValue = parseFloat(slider.value);
+
+            if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
+                // 上または右矢印キーでサイズを増加
+                if (currentValue < 2) {
+                    currentValue = Math.min(2, (Math.round((currentValue + 0.1) * 10) / 10));  // 0.1刻みで増加
+                    slider.value = currentValue;
+                }
+            } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
+                // 下または左矢印キーでサイズを減少
+                if (currentValue > 1) {
+                    currentValue = Math.max(1, (Math.round((currentValue - 0.1) * 10) / 10));  // 0.1刻みで減少
+                    slider.value = currentValue;
+                }
+            }
+
+            // サイズラベル更新
+            const sizeLabel = document.getElementById('size-label');
+            sizeLabel.textContent = `${currentValue}倍`;
+
+            // サイズ変更に合わせて動画を再埋め込み
+            const videoInput = document.getElementById('video-input').value.trim();
+            let videoID = '';
+
+            const urlRegex = /(?:youtube\.com\/(?:[^\/]+\/[^\/]+\/|(?:v|e(?:mbed)?)\/|(?:.*[?&]v=))([^"&?\/\s]{11}))/;
+            const match = videoInput.match(urlRegex);
+            if (match) {
+                videoID = match[1];
+            } else {
+                videoID = videoInput;
+            }
+
+            if (videoID) {
+                embedYouTubeVideo(videoID, currentValue);
+            }
+        });
+    </script>
 </body>
 </html>
