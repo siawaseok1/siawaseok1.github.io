@@ -3,40 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>幸せならokです！YouTube?</title>
+    <title>幸せならokです！YouTube</title>
     <style>
-
-body {
-  font-family: "Arial", sans-serif;
-}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: #000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
 
         #size-controls {
             margin-top: 20px;
         }
+
+        button {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        label, span {
+            font-size: 16px;
+        }
+
+        #size-slider {
+            width: 200px;
+        }
+
+        #size-label {
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        #youtube-embed-container iframe {
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
-    <h2>YouTube動画取得</h2>
+    <h1>YouTube動画を取得</h1>
 
+    <!-- ダークモード切替ボタン -->
+    <button id="dark-mode-toggle">ダークモード</button>
+
+    <!-- 動画IDまたはリンクを入力するフォーム -->
     <form id="video-form">
         <label for="video-input">動画IDまたはリンクを入力:</label>
         <input type="text" id="video-input" name="video" placeholder="動画ID または URL">
         <button type="submit">Go</button>
     </form>
 
+    <!-- 動画サイズ変更のコントロール -->
     <div id="size-controls">
         <label for="size-slider">動画サイズ調整 (幅.矢印キー可): </label>
         <input type="range" id="size-slider" min="1" max="2" step="0.1" value="1">
         <span id="size-label">1倍</span>
     </div>
 
+    <!-- 動画を埋め込むコンテナ -->
     <div id="youtube-embed-container"></div>
 
     <script>
         // 動画IDまたはリンクを埋め込む関数
         function embedYouTubeVideo(videoID, sizeMultiplier = 1) {
             const baseURL = "https://www.youtubeeducation.com/embed/";
-            const params = "?autoplay=0&amp;mute=0&amp;controls=1&amp;start=0&amp;origin=https%3A%2F%2Fcreate.kahoot.it&amp;playsinline=1&amp;showinfo=0&amp;rel=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;fs=1&amp;embed_config=%7B%22enc%22%3A%22ATi76SOph3SBFuU_QUN3IfxfQ3Z3fhVrv1W-w1eN1sRJmB7ZR57oDvxmaXQnxt6h9kQSLo1IZWHKMPKDpN57S1fMI_iM9NuayS9_COjGWKQrPVbECJ71n818_Vvi9U7aKuQAICG0dB4NEI9Bpvw-LfLoUjb7qcUYUw%3D%3D%22%2C%22hideTitle%22%3Atrue%7D&amp;enablejsapi=1&amp;widgetid=1";
+            const params = "?autoplay=1&mute=0&controls=1&start=0&end=199&origin=https%3A%2F%2Fcreate.kahoot.it&playsinline=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&fs=1&embed_config=%7B%22enc%22%3A%22ATi76SPu4GFJ9rACspG6kZvhmOyo112zX6eXKDg0PoZwdPd4f5br_zdha-qk8WNdhj65SvjDaJMbYY6E_TYgVIACHkRMWuHNqS-aWVOmKrIvNYjYA0MGBqjH51pwb2khTJnAW5LP16h9HknvUizWUXAjqg1qiOQw5Q%3D%3D%22%2C%22hideTitle%22%3Atrue%7D&enablejsapi=1&widgetid=175";
 
             const embedURL = baseURL + videoID + params;
 
@@ -70,6 +112,7 @@ body {
             if (match) {
                 videoID = match[1];  // 動画IDを取得
             } else {
+                // そのまま動画IDが入力された場合
                 videoID = videoInput;
             }
 
@@ -103,42 +146,45 @@ body {
             }
         });
 
-        document.addEventListener('keydown', function(event) {
-            const slider = document.getElementById('size-slider');
-            let currentValue = parseFloat(slider.value);
-
-            if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
-                // 上または右矢印キーでサイズを増加
-                if (currentValue < 2) {
-                    currentValue = Math.min(2, (Math.round((currentValue + 0.1) * 10) / 10));  // 0.1刻みで増加
-                    slider.value = currentValue;
-                }
-            } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
-                // 下または左矢印キーでサイズを減少
-                if (currentValue > 1) {
-                    currentValue = Math.max(1, (Math.round((currentValue - 0.1) * 10) / 10));  // 0.1刻みで減少
-                    slider.value = currentValue;
-                }
-            }
-
-            const sizeLabel = document.getElementById('size-label');
-            sizeLabel.textContent = `${currentValue}倍`;
-
-            const videoInput = document.getElementById('video-input').value.trim();
-            let videoID = '';
-
-            const urlRegex = /(?:youtube\.com\/(?:[^\/]+\/[^\/]+\/|(?:v|e(?:mbed)?)\/|(?:.*[?&]v=))([^"&?\/\s]{11}))/;
-            const match = videoInput.match(urlRegex);
-            if (match) {
-                videoID = match[1];
+        // ダークモードの切り替え
+        const darkModeButton = document.getElementById('dark-mode-toggle');
+        darkModeButton.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                darkModeButton.textContent = 'ライトモード';
             } else {
-                videoID = videoInput;
-            }
-
-            if (videoID) {
-                embedYouTubeVideo(videoID, currentValue);
+                darkModeButton.textContent = 'ダークモード';
             }
         });
     </script>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
+<br>
+
 </body>
 </html>
