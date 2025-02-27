@@ -3,95 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>幸せならokです！YouTube</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #fff;
-            color: #000;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .dark-mode {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-        button {
-            padding: 10px;
-            margin-top: 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #size-controls {
-            margin-top: 20px;
-        }
-        label, span {
-            font-size: 16px;
-        }
-        #size-slider {
-            width: 200px;
-        }
-        #size-label {
-            font-size: 16px;
-            margin-left: 10px;
-        }
-        iframe {
-            border-radius: 8px;
-            width: 560px;
-            height: 315px;
-        }
-    </style>
+    <title>動画埋め込み</title>
 </head>
 <body>
-    <h1>YouTube動画を取得</h1>
-    <button id="dark-mode-toggle">ダークモード</button>
-    <form id="video-form">
-        <label for="video-input">動画IDまたはリンクを入力:</label>
-        <input type="text" id="video-input" placeholder="動画ID または URL">
-        <button type="submit">Go</button>
-    </form>
-    <div id="size-controls">
-        <label for="size-slider">動画サイズ調整 (幅.矢印キー可): </label>
-        <input type="range" id="size-slider" min="1" max="2" step="0.1" value="1">
-        <span id="size-label">1倍</span>
-    </div>
-    <div id="youtube-embed-container">
-        <iframe frameborder="0" allowfullscreen="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" width="100%" height="100%" src=" " id="widget2"></iframe>
-    </div>
+    <input type="text" id="videoIdInput" placeholder="動画IDを入力">
+    <button onclick="updateVideo()">動画を変更</button>
+
+    <iframe id="videoFrame" frameborder="0" allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        width="100%" height="100%"
+        src="https://www.youtubeeducation.com/embed/動画ID?autoplay=1&mute=0&controls=1"
+    ></iframe>
+
     <script>
         function updateVideo() {
-            const videoInput = document.getElementById('video-input').value.trim();
-            const match = videoInput.match(/(?:youtube\.com\/(?:[^\/]+\/[^\/]+\/|(?:v|e(?:mbed)?)\/|(?:.*[?&]v=))([^"&?\/\s]{11}))/);
-            const videoID = match ? match[1] : videoInput;
-            if (videoID) {
-                document.getElementById('videoFrame').src = `https://www.youtubeeducation.com/embed/${videoID}?autoplay=1&amp;mute=0&amp;controls=1&amp;start=0&amp;end&amp;origin=https%3A%2F%2Fcreate.kahoot.it&amp;playsinline=0&amp;showinfo=0&amp;rel=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;fs=1&amp;embed_config=%7B%22enc%22%3A%22ATi76SNYAThBLABmptMfKqXI5NAd4S3gktXjdG3y94-CCHdfKCljV7rD90DsJkbWAmDiDOnczKyVwqK7jfKaUN7PbAsJLf-fyOWYS2jDI59_aA_PaIm0odsCV_7pz7BoIU_YeZCfHCO9qrNXVOn9IVOvk1ysOL7TAQ%3D%3D%22%2C%22hideTitle%22%3Atrue%7D&amp;enablejsapi=1&amp;widgetid=1`;
-            } else {
-                alert("YouTubeの動画IDまたはリンクを正しく入力してください。");
+            const videoId = document.getElementById('videoIdInput').value.trim();
+            if (videoId) {
+                document.getElementById('videoFrame').src = `https://www.youtubeeducation.com/embed/${videoId}?https://www.youtubeeducation.com/embed/${videoID}?autoplay=1&amp;mute=0&amp;controls=1&amp;start=0&amp;end&amp;origin=https%3A%2F%2Fcreate.kahoot.it&amp;playsinline=0&amp;showinfo=0&amp;rel=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;fs=1&amp;embed_config=%7B%22enc%22%3A%22ATi76SNYAThBLABmptMfKqXI5NAd4S3gktXjdG3y94-CCHdfKCljV7rD90DsJkbWAmDiDOnczKyVwqK7jfKaUN7PbAsJLf-fyOWYS2jDI59_aA_PaIm0odsCV_7pz7BoIU_YeZCfHCO9qrNXVOn9IVOvk1ysOL7TAQ%3D%3D%22%2C%22hideTitle%22%3Atrue%7D&amp;enablejsapi=1&amp;widgetid=1`;
             }
         }
-
-        document.getElementById('video-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            updateVideo();
-        });
-
-        document.getElementById('size-slider').addEventListener('input', function() {
-            const sizeMultiplier = parseFloat(this.value);
-            document.getElementById('size-label').textContent = `${sizeMultiplier}倍`;
-            const iframe = document.getElementById('videoFrame');
-            iframe.width = 560 * sizeMultiplier;
-            iframe.height = 315 * sizeMultiplier;
-        });
-
-        document.getElementById('dark-mode-toggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark-mode');
-            this.textContent = document.body.classList.contains('dark-mode') ? 'ライトモード' : 'ダークモード';
-        });
     </script>
 </body>
 </html>
