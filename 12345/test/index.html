@@ -1,1 +1,82 @@
-<iframe frameborder="0" allowfullscreen="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" width="100%" height="100%" src="https://www.youtubeeducation.com/embed/QjrkrVmC-8M?autoplay=1&amp;mute=0&amp;controls=1&amp;start=0&amp;end&amp;origin=https%3A%2F%2Fcreate.kahoot.it&amp;playsinline=0&amp;showinfo=0&amp;rel=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;fs=1&amp;embed_config=%7B%22enc%22%3A%22ATi76SNYAThBLABmptMfKqXI5NAd4S3gktXjdG3y94-CCHdfKCljV7rD90DsJkbWAmDiDOnczKyVwqK7jfKaUN7PbAsJLf-fyOWYS2jDI59_aA_PaIm0odsCV_7pz7BoIU_YeZCfHCO9qrNXVOn9IVOvk1ysOL7TAQ%3D%3D%22%2C%22hideTitle%22%3Atrue%7D&amp;enablejsapi=1&amp;widgetid=1" id="widget2"></iframe>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube動画埋め込み</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: #000;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        button {
+            border-radius: 5px;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .container {
+            margin: 20px;
+        }
+        iframe {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <input type="text" id="videoIdInput" placeholder="動画IDまたはURLを入力">
+        <button onclick="updateVideo()">動画を変更</button>
+        <button onclick="toggleDarkMode()">ダークモード切替</button>
+        <br><br>
+        <label for="sizeSlider">サイズ調整:</label>
+        <input type="range" id="sizeSlider" min="1" max="2" step="0.1" value="1" oninput="resizeVideo()">
+        <br>
+        <iframe id="videoFrame" frameborder="0" allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            width="560" height="315">
+        </iframe>
+    </div>
+
+    <script>
+        function extractVideoId(url) {
+            const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([\w-]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : url;
+        }
+
+        function updateVideo() {
+            let input = document.getElementById('videoIdInput').value.trim();
+            let videoId = extractVideoId(input);
+            if (videoId) {
+                document.getElementById('videoFrame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&amp;mute=0&amp;controls=1&amp;start=0&amp;end&amp;origin=https%3A%2F%2Fcreate.kahoot.it&amp;playsinline=0&amp;showinfo=0&amp;rel=0&amp;iv_load_policy=3&amp;modestbranding=1&amp;fs=1&amp;embed_config=%7B%22enc%22%3A%22ATi76SNYAThBLABmptMfKqXI5NAd4S3gktXjdG3y94-CCHdfKCljV7rD90DsJkbWAmDiDOnczKyVwqK7jfKaUN7PbAsJLf-fyOWYS2jDI59_aA_PaIm0odsCV_7pz7BoIU_YeZCfHCO9qrNXVOn9IVOvk1ysOL7TAQ%3D%3D%22%2C%22hideTitle%22%3Atrue%7D&amp;enablejsapi=1&amp;widgetid=1`;
+            }
+        }
+
+        function resizeVideo() {
+            let scale = document.getElementById('sizeSlider').value;
+            let iframe = document.getElementById('videoFrame');
+            iframe.width = 560 * scale;
+            iframe.height = 315 * scale;
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+</body>
+</html>
